@@ -23,7 +23,7 @@ class User(SQLModel, table=True):
     role: Role = Field(default=Role.user)
 
     created_at: datetime | None = Field(
-        nullable=False, sa_column_kwargs={"server_default": datetime.now(timezone.utc)}
+        nullable=False, sa_column_kwargs={"server_default": "CURRENT_TIMESTAMP"}
     )
 
     updated_at: datetime | None = Field(

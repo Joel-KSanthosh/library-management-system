@@ -3,6 +3,7 @@ import os
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from sqlmodel import SQLModel, create_engine
 
 load_dotenv()
 user = os.getenv("PG_USER", "PG_USER")
@@ -14,6 +15,14 @@ database = os.getenv("PG_DBNAME", "PG_DBNAME")
 app = FastAPI()
 
 POSTGRES_URL = f"postgresql://{user}:{password}@{hostname}:{port}/{database}"
+engine = create_engine(POSTGRES_URL, echo=True)
+
+
+def init_db():
+    SQLModel.metadata.create_all(engine)
+
+
+init_db()
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=8000)
