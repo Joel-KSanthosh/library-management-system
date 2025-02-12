@@ -21,7 +21,7 @@ class Publisher(SQLModel, table=True):
     books: list["Book"] = Relationship(back_populates="publisher")
 
 
-class Book(SQLModel, Table=True):
+class Book(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     isbn: str = Field(index=True, unique=True)
     title: str

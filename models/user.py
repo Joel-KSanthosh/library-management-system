@@ -1,35 +1,45 @@
-from datetime import datetime, timezone
-from enum import Enum
-from uuid import UUID, uuid4
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
-from pydantic import EmailStr
-from sqlmodel import Field, SQLModel
-
-
-class Role(str, Enum):
-    user = "USER"
-    admin = "ADMIN"
-    librarian = "LIBRARIAN"
+ph = PasswordHasher()
 
 
-class User(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    uuid: UUID = Field(default_factory=uuid4, unique=True)
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class UserSignUp(UserLogin):
     first_name: str
     middle_name: str | None = None
     last_name: str
-    email: EmailStr = Field(index=True, unique=True)
-    password: str
-    role: Role = Field(default=Role.user)
+    password: str = Field(min_length=4)
+    confirm_password: str = Field(min_length=4)
 
-    created_at: datetime | None = Field(
-        nullable=False, sa_column_kwargs={"server_default": "CURRENT_TIMESTAMP"}
-    )
+    model_config = ConfigDict(extra="forbid")
 
-    updated_at: datetime | None = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        nullable=False,
-        sa_column_kwargs={
-            "onupdate": lambda: datetime.now(timezone.utc),
-        },
-    )
+    @model_validator(mode="after")
+    def check_password(self) -> "UserSignUp":
+        if (
+            self.password
+            and self.confirm_password
+            and self.password == self.confirm_password
+        ):
+            return self
+        else:
+            raise ValueError("Password doesn't match")
+
+
+def hash_password(password: str) -> str:
+    return ph.hash(password)
+
+
+def verify_password_and_hash(password: str, hash: str) -> bool:
+    try:
+        return ph.verify(hash, password)
+
+    except VerifyMismatchError:
+        return False
