@@ -1,8 +1,7 @@
-from argon2 import PasswordHasher
-from argon2.exceptions import VerifyMismatchError
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
+from datetime import datetime
+from uuid import UUID
 
-ph = PasswordHasher()
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 
 class UserLogin(BaseModel):
@@ -33,13 +32,11 @@ class UserSignUp(UserLogin):
             raise ValueError("Password doesn't match")
 
 
-def hash_password(password: str) -> str:
-    return ph.hash(password)
-
-
-def verify_password_and_hash(password: str, hash: str) -> bool:
-    try:
-        return ph.verify(hash, password)
-
-    except VerifyMismatchError:
-        return False
+class UserProfile(BaseModel):
+    user_id: UUID
+    first_name: str
+    middle_name: str | None = None
+    last_name: str
+    email: EmailStr
+    created_time: datetime
+    updated_time: datetime

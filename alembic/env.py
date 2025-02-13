@@ -4,6 +4,7 @@ from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
 from alembic import context
+from db.database import POSTGRES_URL
 from schemas.book import Author, Book, Genre, Publisher
 from schemas.library import Library, UserFine
 from schemas.user import User
@@ -17,6 +18,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+config.set_main_option("sqlalchemy.url", POSTGRES_URL)
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel

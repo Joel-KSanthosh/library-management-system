@@ -8,6 +8,4 @@ exclude =
     old,
     build,
     dist
-per-file-ignores =
-    __init__.py: F401 
-    env.py: F401
+per-file-ignores = __init__.py: F401 ,env.py: F401
