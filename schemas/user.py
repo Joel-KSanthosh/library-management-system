@@ -20,11 +20,9 @@ class User(SQLModel, table=True):
     last_name: str
     email: EmailStr = Field(index=True, unique=True)
     password: str
-    role: Role = Field(default=Role.user)
+    role: str = Field(default=Role.user.value)
 
-    created_at: datetime | None = Field(
-        nullable=False, sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")}
-    )
+    created_at: datetime | None = Field(nullable=False, sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")})
 
     updated_at: datetime | None = Field(
         default_factory=lambda: datetime.now(timezone.utc),
