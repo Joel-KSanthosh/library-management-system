@@ -3,7 +3,10 @@ from typing import Annotated
 
 from dotenv import load_dotenv
 from fastapi import Depends
-from sqlmodel import Session, create_engine
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.orm import sessionmaker
+from sqlmodel import Session
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 load_dotenv()
 url = os.getenv("PG_URL", "PG_URL")
@@ -15,12 +18,13 @@ database = os.getenv("PG_DBNAME", "PG_DBNAME")
 SECRET = os.getenv("SECRET", "SECRET")
 
 POSTGRES_URL = f"{url}://{user}:{password}@{hostname}:{port}/{database}"
-engine = create_engine(POSTGRES_URL, echo=True)
+async_engine = create_async_engine(POSTGRES_URL, echo=True, future=True)
 
 
-def get_session():
-    with Session(engine) as session:
-        yield session
+async def get_async_session() -> AsyncSession:  # type: ignore
+    async_session = sessionmaker(bind=async_engine, class_=AsyncSession, expire_on_commit=False)  # type: ignore
+    async with async_session() as session:  # type: ignore
+        yield session  # type: ignore
 
 
-SessionDep = Annotated[Session, Depends(get_session)]
+SessionDep = Annotated[AsyncSession, Depends(get_async_session)]

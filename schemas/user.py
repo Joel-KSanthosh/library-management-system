@@ -3,6 +3,7 @@ from enum import Enum
 from uuid import UUID, uuid4
 
 from pydantic import EmailStr
+from sqlalchemy import func
 from sqlmodel import Field, SQLModel, text
 
 
@@ -21,13 +22,12 @@ class User(SQLModel, table=True):
     email: EmailStr = Field(index=True, unique=True)
     password: str
     role: str = Field(default=Role.user.value)
-
     created_at: datetime | None = Field(nullable=False, sa_column_kwargs={"server_default": text("CURRENT_TIMESTAMP")})
-
     updated_at: datetime | None = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
         nullable=False,
+        default_factory=datetime.now,
         sa_column_kwargs={
-            "onupdate": lambda: datetime.now(timezone.utc),
+            "server_default": func.now(),
+            "onupdate": func.now(),
         },
     )

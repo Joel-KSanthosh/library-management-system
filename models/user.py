@@ -22,11 +22,7 @@ class UserSignUp(UserLogin):
 
     @model_validator(mode="after")
     def check_password(self) -> "UserSignUp":
-        if (
-            self.password
-            and self.confirm_password
-            and self.password == self.confirm_password
-        ):
+        if self.password and self.confirm_password and self.password == self.confirm_password:
             return self
         else:
             raise ValueError("Password doesn't match")
