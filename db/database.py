@@ -5,9 +5,9 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from config.base import POSTGRES_URL
+from config.base import settings
 
-async_engine = create_async_engine(POSTGRES_URL, echo=True, future=True)
+async_engine = create_async_engine(settings.POSTGRES_URL, echo=True, future=True)
 
 
 async def get_async_session() -> AsyncSession:  # type: ignore
