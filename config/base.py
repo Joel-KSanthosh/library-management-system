@@ -48,10 +48,4 @@ class HealthCheck(BaseModel):
     description: str
 
 
-# class Config:
-#     env_file = Path(Path(__file__).resolve.parent.parent) / ".env"
-
-
 settings = Settings()  # type: ignore
-
-print(settings.ACCESS_TOKEN_EXPIRE_MINUTES)
