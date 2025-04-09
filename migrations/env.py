@@ -7,7 +7,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlmodel import SQLModel
 
-from db.database import POSTGRES_URL
+from config.base import settings
 from schemas.book import *
 from schemas.library import *
 from schemas.user import *
@@ -32,7 +32,7 @@ target_metadata = SQLModel.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
-config.set_main_option("sqlalchemy.url", POSTGRES_URL)
+config.set_main_option("sqlalchemy.url", settings.POSTGRES_URL)
 
 
 def run_migrations_offline() -> None:
