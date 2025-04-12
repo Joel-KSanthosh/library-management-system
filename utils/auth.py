@@ -13,7 +13,7 @@ def hash_password(password: str) -> str:
     return ph.hash(password)
 
 
-def verify_password_and_hash(password: str, hash: str) -> bool:
+def verify_password(password: str, hash: str) -> bool:
     try:
         return ph.verify(hash, password)
 
