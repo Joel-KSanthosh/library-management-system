@@ -16,7 +16,7 @@ class UserSignUp(UserLogin):
     middle_name: str | None = None
     last_name: str
     password: str = Field(min_length=4)
-    confirm_password: str = Field(min_length=4)
+    confirm_password: str = Field(min_length=4, exclude=True)
 
     model_config = ConfigDict(extra="forbid")
 

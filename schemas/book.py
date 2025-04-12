@@ -1,31 +1,44 @@
-from pydantic import EmailStr
-from sqlmodel import Field, Relationship, SQLModel
+from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
+
+from . import Base
 
 
-class Author(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    name: str
-    email: EmailStr = Field(index=True, unique=True)
-    books: list["Book"] = Relationship(back_populates="author")
+class Author(Base):
+    __tablename__ = "author"
+
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    name = Column(String(255), nullable=False)
+    email = Column(String(255), index=True, unique=True, nullable=False)
+    books = relationship("Book", back_populates="author", uselist=True)
 
 
-class Genre(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    name: str
-    books: list["Book"] = Relationship(back_populates="genre")
+class Genre(Base):
+    __tablename__ = "genre"
+
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    name = Column(String(255), nullable=False, index=True)
+    books = relationship("Book", back_populates="genre", uselist=True)
 
 
-class Publisher(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    name: str
-    books: list["Book"] = Relationship(back_populates="publisher")
+class Publisher(Base):
+    __tablename__ = "publisher"
+
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    name = Column(String(255), nullable=False, index=True)
+    books = relationship("Book", back_populates="publisher", uselist=True)
 
 
-class Book(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    isbn: str = Field(index=True, unique=True)
-    title: str
-    genre: Genre | None = Relationship(back_populates="books")
-    author: Author | None = Relationship(back_populates="books")
-    no_of_pages: int
-    publisher: Publisher | None = Relationship(back_populates="books")
+class Book(Base):
+    __tablename__ = "book"
+
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    isbn = Column(String(255), index=True, unique=True, nullable=False)
+    title = Column(String(255), nullable=False)
+    genre_id = Column(Integer, ForeignKey("genre.id"), nullable=False)
+    genre = relationship("Genre", back_populates="books")
+    author_id = Column(Integer, ForeignKey("author.id"), nullable=False)
+    author = relationship("Author", back_populates="books")
+    no_of_pages = Column(Integer, nullable=False)
+    publisher_id = Column(Integer, ForeignKey("publisher.id"), nullable=False)
+    publisher = relationship("Publisher", back_populates="books")
