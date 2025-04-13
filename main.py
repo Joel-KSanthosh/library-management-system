@@ -1,19 +1,36 @@
+import asyncio
+import contextlib
+import logging
+
 import uvicorn
+from alembic import command
+from alembic.config import Config
 from fastapi import FastAPI
 from sqlalchemy.exc import IntegrityError
 
-from api import user
+from api import auth, user
 from config.base import HealthCheck, settings
-from db.sessions import get_db_session, sessionmanager
+from db.sessions import sessionmanager
 from schemas.user import User
 from utils.auth import hash_password
 
+log = logging.getLogger("uvicorn")
 
+
+async def run_migrations():
+    alemibi_cfg = Config("alembic.ini")
+    await asyncio.to_thread(command.upgrade, alemibi_cfg, "head")
+
+
+@contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     Function that handles startup and shutdown events.
     To understand more, read https://fastapi.tiangolo.com/advanced/events/
     """
+    log.info("Starting up the application")
+    log.info("Running alembic migrations")
+    await run_migrations()
     if sessionmanager._sessionmaker is not None:
         async with sessionmanager.session() as session:
             if settings.super_user:
@@ -24,13 +41,13 @@ async def lifespan(app: FastAPI):
                     session.add(user)
                     await session.commit()
                     await session.refresh(user)
-                    print(10 * "-", "SUPER USER CREATED", 10 * "-")
+                    log.info(10 * "-", "SUPER USER CREATED", 10 * "-")
                 except IntegrityError:
                     pass
                 except Exception:
                     raise
             else:
-                raise ValueError("SUPERUSER DETAILS MISSING")
+                log.error("SUPERUSER DETAILS MISSING")
 
     yield
     if sessionmanager._engine is not None:
@@ -39,15 +56,9 @@ async def lifespan(app: FastAPI):
         print("DATABASE CONNECTION TERMINATED")
 
 
-app = FastAPI(
-    lifespan=lifespan,
-    title=settings.project_name,
-    version=settings.version,
-    root_path=settings.api_prefix,
-    openapi_url="/openapi.json",
-    debug=settings.debug,
-)
+app = FastAPI(lifespan=lifespan, title=settings.project_name, version=settings.version, root_path=settings.api_prefix, openapi_url="/openapi.json", debug=settings.debug)
 app.include_router(user.router)
+app.include_router(auth.router)
 
 
 @app.get("/", response_model=HealthCheck, tags=["status"])

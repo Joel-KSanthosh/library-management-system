@@ -1,5 +1,4 @@
-import os
-from pathlib import Path
+from typing import Any
 
 from dotenv import load_dotenv
 from pydantic import BaseModel
@@ -26,7 +25,12 @@ class Settings(BaseSettings):
     SECRET: str
 
     # SUPERUSER
-    super_user: dict
+    super_user: dict[str, Any]
+
+    # REDIS
+    redis_host: str
+    redis_password: str
+    redis_db: int
 
 
 class HealthCheck(BaseModel):
