@@ -29,10 +29,12 @@ class UserSignUp(UserLogin):
 
 
 class UserProfile(BaseModel):
-    user_id: UUID
+    uuid: UUID = Field(alias="user_id")
     first_name: str
     middle_name: str | None = None
     last_name: str
     email: EmailStr
-    created_time: datetime
-    updated_time: datetime
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(validate_by_name=True, from_attributes=True)
