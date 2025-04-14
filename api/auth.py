@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, HTTPException, status
+from fastapi import APIRouter, Body, Form, HTTPException, status
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -8,9 +8,14 @@ from sqlalchemy.exc import IntegrityError
 from db.sessions import DBSession
 from models.user import UserLogin, UserSignUp
 from schemas.user import User
-from utils.auth import create_access_token, create_refresh_token, hash_password, is_refresh_token_valid, revoke_refresh_token, store_refresh_token, verify_refresh_token
+from utils.auth import create_access_token, create_refresh_token, hash_password, is_refresh_token_valid, revoke_refresh_token, store_refresh_token, verify_password, verify_refresh_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.post("/token", include_in_schema=False)
+async def fake_token(username: str = Form(...), password: str = Form(...)):
+    return {"access_token": "fake-access-token", "token_type": "bearer"}
 
 
 @router.post("/signup")
@@ -32,14 +37,15 @@ async def login(user: Annotated[UserLogin, Body()], session: DBSession) -> JSONR
     result = await session.execute(select(User).where(User.email == user.email))
     user_details = result.scalar()
     if user_details:
-        user_id = str(user_details.uuid)
-        refresh_token, jti, exp = await create_refresh_token(user_id)
-        await store_refresh_token(jti, user_id, exp)
-        access_token = await create_access_token(user_id)
-
-        return JSONResponse(status_code=status.HTTP_200_OK, content={"access-token": access_token, "refresh-token": refresh_token})
+        if verify_password(user.password, user_details.password):  # type: ignore
+            user_id = str(user_details.uuid)
+            refresh_token, jti, exp = await create_refresh_token(user_id)
+            await store_refresh_token(jti, user_id, exp)
+            access_token = await create_access_token(user_id)
+            return JSONResponse(status_code=status.HTTP_200_OK, content={"access-token": access_token, "refresh-token": refresh_token, "token_type": "bearer"})
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     else:
-        return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content={"details": "User doesn't exists!"})
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
 
 
 @router.post("/refresh")

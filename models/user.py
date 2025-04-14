@@ -11,7 +11,8 @@ class UserLogin(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class UserSignUp(UserLogin):
+class UserSignUp(BaseModel):
+    email: EmailStr
     first_name: str
     middle_name: str | None = None
     last_name: str
@@ -37,4 +38,7 @@ class UserProfile(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(validate_by_name=True, from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        validate_by_name=True,
+    )
