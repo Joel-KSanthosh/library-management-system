@@ -29,6 +29,7 @@ async def insert_user(user: Annotated[UserSignUp, Body()], session: DBSession) -
             await session.refresh(db_user)
             return JSONResponse(status_code=status.HTTP_201_CREATED, content={"details": "Successfully Created User"})
         except IntegrityError:
+            await session.rollback()
             return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"details": f"User with the email - {user.email} already exists"})
 
 

@@ -8,7 +8,7 @@ from alembic.config import Config
 from fastapi import FastAPI
 from sqlalchemy.exc import IntegrityError
 
-from api import auth, user
+from api import auth, book, user
 from config.base import HealthCheck, settings
 from db.sessions import sessionmanager
 from schemas.user import User
@@ -59,6 +59,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan, title=settings.project_name, version=settings.version, root_path=settings.api_prefix, openapi_url="/openapi.json", debug=settings.debug)
 app.include_router(user.router)
 app.include_router(auth.router)
+app.include_router(book.router)
 
 
 @app.get("/", response_model=HealthCheck, tags=["status"])
