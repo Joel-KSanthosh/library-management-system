@@ -17,7 +17,7 @@ class Genre(Base):
     __tablename__ = "genre"
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    name = Column(String(255), nullable=False, index=True)
+    name = Column(String(255), nullable=False, index=True, unique=True)
     books = relationship("Book", back_populates="genre", uselist=True)
 
 
@@ -25,7 +25,7 @@ class Publisher(Base):
     __tablename__ = "publisher"
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    name = Column(String(255), nullable=False, index=True)
+    name = Column(String(255), nullable=False, index=True, unique=True)
     books = relationship("Book", back_populates="publisher", uselist=True)
 
 
