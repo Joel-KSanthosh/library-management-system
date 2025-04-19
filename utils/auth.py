@@ -14,7 +14,7 @@ from config.base import settings
 from db.sessions import DBSession
 from schemas.user import User
 
-r = redis.Redis(host=settings.redis_host, password=settings.redis_password, db=settings.redis_db)
+r = redis.Redis(host=settings.redis_host, db=settings.redis_db)
 
 ph = PasswordHasher()
 
